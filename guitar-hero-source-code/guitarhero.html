@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>guitarhero</title>
+  <script src="../../jsgame0.js"></script>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+#original {
+  margin-left: 1em;
+}
+  </style>
+</head>
+
+<body>
+<section id="imageLoader" class="hidden">
+  <img class="hidden" src="images/background.png" alt="background" data-name="background">
+  <img class="hidden" src="images/counter0.png" alt="counter0" data-name="counter0">
+  <img class="hidden" src="images/counter1.png" alt="counter1" data-name="counter1">
+  <img class="hidden" src="images/counter2.png" alt="counter2" data-name="counter2">
+  <img class="hidden" src="images/counter3.png" alt="counter3" data-name="counter3">
+  <img class="hidden" src="images/counter4.png" alt="counter4" data-name="counter4">
+  <img class="hidden" src="images/fade.png" alt="fade" data-name="fade">
+  <img class="hidden" src="images/shine.png" alt="shine" data-name="shine">
+</section>
+<section id="musicLoader" class="hidden">
+  <audio class="hidden" controls preload="auto" src="music/themoment.mp3" data-name="themoment">Your browser does not support the audio element.</audio>
+</section>
+
+<main>
+<h1>guitarhero</h1>
+
+<canvas id="screen">
+The game screen appears here if your browser supports the Canvas API.
+</canvas>
+<section id="controls">
+  <button type="button" id="reset">Reset</button>
+  <button type="button" id="pause">Pause</button>
+</section>
+
+<h2>Attribution</h2>
+
+<p><a href="https://wireframe.raspberrypi.com/issues/62">Make a Guitar Hero-style rhythm action game, pages 66-67, by Mark Vanstone</a>.</p>
+
+<p>Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported</a>.</p>
+
+<p><a href="https://www.raspberrypi.com/news/make-a-guitar-hero-style-rhythm-action-game-wireframe-62/">Blog post of Source Code</a>.</p>
+
+<h2>Original Python code</h2>
+
+<pre id="original"><code>
+# Guitar Hero
+import pgzrun
+import time
+
+curTime = time.time()
+deltaTime = 0
+startTime = 0
+score = 0
+bps = 100.5
+firstTime = True
+counters = []
+shine = [0,0,0,0,0]
+counterPoints = [(2,9.3),(0,11.5),(3,13.8),(1,16.2),(2,18.5),(0,20.7),
+                 (2,23),(0,25),(3,27.6),(1,29.8),(2,32.1),(0,34.5),
+                 (4,36.6),(1,38.9),(3,41),(1,43.5),(2,44.6),(3,45.7),(0,48),
+                 (4,50.3),(1,52.5),(1,53.5),(2,53.9),(3,54.5),
+                 (4,54.8),(2,57.1),(4,59.4),(2,61.7),(4,64.1),(2,66.6),(0,69.8)
+                 ]
+for c in counterPoints:
+    counters.append(Actor(&#x27;counter&#x27;+str(c[0]), center=(300+(c[0]*50), (c[1]-9.9)*-50)))
+    counters[len(counters)-1].state = 1
+
+def draw():
+    screen.blit(&quot;background&quot;, (0, 0))
+    drawCounters()
+    screen.blit(&quot;fade&quot;, (0, 0))
+    for s in range(0,5):
+        if shine[s] &gt; 0:
+            screen.blit(&quot;shine&quot;, (230+(s*50), 450))
+            shine[s] -= 1
+    screen.draw.text(&quot;SCORE:&quot;+str(score), center= (400,575), owidth=0.5, ocolor=(255,255,255), color=(0,0,255) , fontsize=40)
+    if curTime - startTime &gt; 70:
+        screen.draw.text(&quot;WELL DONE! YOU ARE A&quot;, center= (400,280), owidth=0.5, ocolor=(255,255,255), color=(255,0,0) , fontsize=40)
+        screen.draw.text(&quot;PYGAME ZERO HERO&quot;, center= (400,320), owidth=0.5, ocolor=(255,255,255), color=(255,0,0) , fontsize=40)
+
+def update():
+    global deltaTime, curTime, firstTime, startTime
+    if firstTime:
+        music.play_once(&#x27;themoment&#x27;)
+        startTime = time.time()
+        firstTime = False
+    deltaTime = time.time()-curTime
+    curTime = time.time()
+    updateCounters()
+
+def on_key_down(key):
+    if key.name == &quot;SPACE&quot;:
+        for c in counters:
+            if c.y &gt; 490 and c.y &lt; 525:
+                if c.x == 300 and keyboard.z: noteCorrect(0)
+                if c.x == 350 and keyboard.x: noteCorrect(1)
+                if c.x == 400 and keyboard.c: noteCorrect(2)
+                if c.x == 450 and keyboard.v: noteCorrect(3)
+                if c.x == 500 and keyboard.b: noteCorrect(4)
+
+def drawCounters():
+    for c in counters:
+        if c.y &lt; 520 and c.y &gt; -20:
+            c.draw()
+
+def updateCounters():
+    for c in counters:
+        c.y += (bps/2)*deltaTime
+
+def noteCorrect(column):
+    global score
+    shine[column] = 10
+    score += 10
+
+pgzrun.go()
+</code></pre>
+</main>
+
+<script>
+// Guitar Hero
+
+const BPS = 100.5;
+
+const COUNTER_POINTS = [
+  [2, 9.3], [0, 11.5], [3, 13.8], [1, 16.2], [2, 18.5], [0, 20.7],
+  [2, 23], [0, 25], [3, 27.6], [1, 29.8], [2, 32.1], [0, 34.5],
+  [4, 36.6], [1, 38.9], [3, 41], [1, 43.5], [2, 44.6], [3, 45.7], [0, 48],
+  [4, 50.3], [1, 52.5], [1, 53.5], [2, 53.9], [3, 54.5],
+  [4, 54.8], [2, 57.1], [4, 59.4], [2, 61.7], [4, 64.1], [2, 66.6], [0, 69.8]
+];
+
+var elapsed, score, counters, shine;
+
+function reset() {
+  elapsed = 0;
+  score = 0;
+  shine = [0, 0, 0, 0, 0];
+  counters = [];
+  for (let c of COUNTER_POINTS) {
+    let actor = new Actor('counter' + c[0]);
+    actor.center = [300 + (c[0] * 50), (c[1] - 9.9) * -50];
+    actor.state = 1;
+    counters.push(actor);
+  }
+}
+
+function draw() {
+  screen.blit("background", [0, 0]);
+  drawCounters();
+  screen.blit("fade", [0, 0]);
+  for (let s = 0; s < 5; s++) {
+    if (shine[s] > 0) {
+      screen.blit("shine", [230 + (s * 50), 450]);
+      shine[s] -= 1;
+    }
+  }
+  screen.draw.text("SCORE:" + score, {
+    center: [400, 575],
+    owidth: 0.5,
+    ocolor: [255, 255, 255],
+    color: [0, 0, 255],
+    fontsize: 40
+  });
+  if (elapsed > 70) {
+    screen.draw.text("WELL DONE! YOU ARE A", {
+      center: [400, 280],
+      owidth: 0.5,
+      ocolor: [255, 255, 255],
+      color: [255, 0, 0],
+      fontsize: 40
+    });
+    screen.draw.text("PYGAME ZERO HERO", {
+      center: [400, 320],
+      owidth: 0.5,
+      ocolor: [255, 255, 255],
+      color: [255, 0, 0],
+      fontsize: 40
+    });
+  }
+}
+
+function update(dt) {
+  if (elapsed <= 0) {
+    music.play_once('themoment');
+  }
+  elapsed += dt;
+  updateCounters(dt);
+}
+
+function on_key_down(key) {
+  if (key === keys.SPACE) {
+    for (let c of counters) {
+      if ((c.posy > 490) && (c.posy < 525)) {
+        if ((c.posx === 300) && keyboard[keys.Z]) {
+          noteCorrect(0);
+        }
+        if ((c.posx === 350) && keyboard[keys.X]) {
+          noteCorrect(1);
+        }
+        if ((c.posx === 400) && keyboard[keys.C]) {
+          noteCorrect(2);
+        }
+        if ((c.posx === 450) && keyboard[keys.V]) {
+          noteCorrect(3);
+        }
+        if ((c.posx === 500) && keyboard[keys.B]) {
+          noteCorrect(4);
+        }
+      }
+    }
+  }
+}
+
+function drawCounters() {
+  for (let c of counters) {
+    if ((c.posy < 520) && (c.posy > -20)) {
+      c.draw();
+    }
+  }
+}
+
+function updateCounters(dt) {
+  for (let c of counters) {
+    c.posy += (BPS / 2) * dt;
+  }
+}
+
+function noteCorrect(column) {
+  shine[column] = 10;
+  score += 10;
+}
+
+window.addEventListener('load', (event) => {
+  images.LOAD('#imageLoader img');
+  music.LOAD('#musicLoader audio');
+  reset();
+  screen.set_mode('#screen', '#reset', '#pause');
+});
+</script>
+</body>
+
+</html>
