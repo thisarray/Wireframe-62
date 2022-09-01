@@ -245,10 +245,7 @@ function noteCorrect(column) {
 }
 
 window.addEventListener('load', (event) => {
-  images.LOAD('#imageLoader img');
-  music.LOAD('#musicLoader audio');
-  reset();
-  screen.set_mode('#screen', '#reset', '#pause');
+  screen.init();
 });
 </script>
 </body>
